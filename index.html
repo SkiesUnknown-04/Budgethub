@@ -581,6 +581,8 @@ let state = {
   health: {},        // { monthKey: { entries, budget } }
   outing: {},        // { monthKey: { entries, budget } }
   notificationsEnabled: false,
+  healthLabel: "Health",
+  outingLabel: "Outing / Dining",
 };
 
 /* ==============================================================
@@ -1479,11 +1481,11 @@ function renderHealth(el) {
     <div class="Style_Card Style_Card_Savings">
       <div class="Style_Label u-success">Shifted to savings</div>
       <div class="u-fs-3xl u-bold u-success">${fmt(hSaved + oSaved)}</div>
-      <div class="u-fs-sm u-muted">Health: ${fmt(hSaved)} + Outing: ${fmt(oSaved)}</div>
+      <div class="u-fs-sm u-muted">${state.healthLabel}: ${fmt(hSaved)} + ${state.outingLabel}: ${fmt(oSaved)}</div>
     </div>`;
 
-  html += renderBudgetSection("Health", "health", mk, state.health[mk], "var(--Accent_07)", "💊");
-  html += renderBudgetSection("Outing / Dining", "outing", mk, state.outing[mk], "var(--Accent_05)", "🍽️");
+  html += renderBudgetSection(state.healthLabel, "health", mk, state.health[mk], "var(--Accent_07)", "💊");
+  html += renderBudgetSection(state.outingLabel, "outing", mk, state.outing[mk], "var(--Accent_05)", "🍽️");
 
   html += `</div>`;
   el.innerHTML = html;
@@ -1498,7 +1500,11 @@ function renderBudgetSection(title, type, mk, data, color, icon) {
   let html = `
     <div class="Style_Card">
       <div style="display:flex;justify-content:space-between;align-items:center;" class="u-mb-sm">
-        <div class="u-fs-lg u-bold">${icon} ${title}</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="u-fs-lg u-bold">${icon} ${title}</div>
+          <button onclick="openRenameBudget('${type}');"
+            style="background:none;border:none;color:var(--Color_05);font-size:11px;cursor:pointer;padding:2px 6px;border-radius:4px;border:1px solid rgba(255,255,255,.06);">rename</button>
+        </div>
         <div class="u-text-right">
           <div class="u-fs-xl u-bold" style="color:${over ? 'var(--Accent_06)' : color};">
             ${fmt(spent)} <span class="u-fs-sm u-muted" style="font-weight:400;">/ ${fmt(data.budget)}</span>
@@ -1673,6 +1679,39 @@ function checkNotifications() {
       });
     }
   });
+}
+
+/* ==============================================================
+   RENAME HEALTH & OUTING
+   ============================================================== */
+function openRenameBudget(type) {
+  const current = type === "health" ? state.healthLabel : state.outingLabel;
+  const icon = type === "health" ? "💊" : "🍽️";
+
+  document.getElementById("modal-root").innerHTML = `
+    <div class="Style_ModalBg" onclick="if(event.target===this)closeModal();">
+      <div class="Style_Modal">
+        <h3>Rename ${icon} ${current}</h3>
+        <div class="u-mb-lg">
+          <div class="Style_Label u-mb-sm">New name</div>
+          <input id="rb-name" type="text" class="Style_Input"
+            value="${current}" autofocus
+            onkeydown="if(event.key==='Enter')submitRenameBudget('${type}');">
+        </div>
+        <button class="Style_Btn Style_BtnPrimary" onclick="submitRenameBudget('${type}');">Rename</button>
+        <button class="Style_Btn Style_BtnGhost" onclick="closeModal();">Cancel</button>
+      </div>
+    </div>`;
+}
+
+function submitRenameBudget(type) {
+  const name = document.getElementById("rb-name").value.trim();
+  if (!name) { alert("Enter a name."); return; }
+  if (type === "health") state.healthLabel = name;
+  else state.outingLabel = name;
+  saveState();
+  closeModal();
+  render();
 }
 
 /* ==============================================================
