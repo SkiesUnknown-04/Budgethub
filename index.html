@@ -1,0 +1,1750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BudgetHub">
+  <meta name="theme-color" content="#08090f">
+  <title>BudgetHub</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%236366f1'/><text x='50' y='70' text-anchor='middle' font-size='50' font-weight='bold' fill='%23fff'>H</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==============================
+       RESET & BASE
+       ============================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      height: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: 'Outfit', system-ui, sans-serif;
+      background: var(--Color_01);
+      color: var(--Color_04);
+      min-height: 100vh;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* ==============================
+       COLOR PALETTE (CSS Variables)
+       ============================== */
+    :root {
+      --Color_01: #08090f;       /* Background - deepest */
+      --Color_02: #0d0f16;       /* Input backgrounds */
+      --Color_03: #111318;       /* Card backgrounds */
+      --Color_04: #e0e1e6;       /* Primary text */
+      --Color_05: #4a4e5c;       /* Muted text / labels */
+      --Color_06: #3a3e4c;       /* Faintest text */
+      --Color_07: #2a2e3c;       /* Disabled / empty */
+      --Color_08: #8b8f9e;       /* Secondary text */
+      --Color_09: rgba(255, 255, 255, 0.04);  /* Subtle borders */
+      --Color_10: rgba(255, 255, 255, 0.06);  /* Input borders */
+
+      --Accent_01: #6366f1;      /* Primary accent (indigo) */
+      --Accent_02: #4f46e5;      /* Primary accent dark */
+      --Accent_03: #a5b4fc;      /* Primary accent light */
+      --Accent_04: #34d399;      /* Success / savings (green) */
+      --Accent_05: #f59e0b;      /* Warning (amber) */
+      --Accent_06: #ef4444;      /* Danger (red) */
+      --Accent_07: #60a5fa;      /* Info (blue) */
+      --Accent_08: #a78bfa;      /* Subscriptions (purple) */
+      --Accent_09: #fbbf24;      /* Due soon (yellow) */
+
+      --Radius_01: 6px;
+      --Radius_02: 8px;
+      --Radius_03: 10px;
+      --Radius_04: 12px;
+      --Radius_05: 14px;
+      --Radius_06: 20px;
+    }
+
+    /* ==============================
+       ANIMATIONS
+       ============================== */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(100%); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==============================
+       LAYOUT: TOPBAR
+       ============================== */
+    .Style_Topbar {
+      padding: 14px 16px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--Color_09);
+      position: sticky;
+      top: 0;
+      background: var(--Color_01);
+      z-index: 20;
+    }
+
+    .Style_Topbar_Brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .Style_Topbar_Icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, var(--Accent_01), var(--Accent_02));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .Style_Topbar_Name {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    /* ==============================
+       LAYOUT: TABS
+       ============================== */
+    .Style_Tabs {
+      display: flex;
+      gap: 3px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--Color_09);
+      overflow-x: auto;
+    }
+
+    .Style_Tab {
+      padding: 7px 12px;
+      border-radius: var(--Radius_06);
+      border: none;
+      background: transparent;
+      color: var(--Color_05);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+
+    .Style_Tab:active {
+      transform: scale(0.96);
+    }
+
+    .Style_Tab.active {
+      color: var(--Accent_03);
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    /* ==============================
+       LAYOUT: CONTAINER
+       ============================== */
+    .Style_Container {
+      padding: 0 16px 40px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* ==============================
+       COMPONENTS: CARD
+       ============================== */
+    .Style_Card {
+      background: var(--Color_03);
+      border-radius: var(--Radius_05);
+      padding: 16px;
+      margin-bottom: 10px;
+      border: 0.5px solid var(--Color_09);
+      animation: fadeIn 0.2s ease;
+    }
+
+    .Style_Card_Savings {
+      text-align: center;
+      background: #0a1f0f;
+      border-color: #1a4a2a;
+    }
+
+    .Style_Card_Warning {
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      background: #1a1805;
+    }
+
+    /* ==============================
+       COMPONENTS: LABEL & TEXT
+       ============================== */
+    .Style_Label {
+      font-size: 10px;
+      color: var(--Color_05);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 4px;
+    }
+
+    .Style_Row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 0.5px solid var(--Color_09);
+      font-size: 13px;
+    }
+
+    .Style_Row:last-child {
+      border-bottom: none;
+    }
+
+    .Style_MiniEntry {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      border-bottom: 0.5px solid rgba(255, 255, 255, 0.02);
+      font-size: 12px;
+    }
+
+    .Style_MiniEntry:last-child {
+      border-bottom: none;
+    }
+
+    /* ==============================
+       COMPONENTS: PROGRESS BAR
+       ============================== */
+    .Style_BarBg {
+      height: 6px;
+      background: var(--Color_09);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .Style_BarFg {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    /* ==============================
+       COMPONENTS: CHECKBOX
+       ============================== */
+    .Style_Check {
+      width: 22px;
+      height: 22px;
+      border-radius: var(--Radius_01);
+      border: 1.5px solid var(--Color_10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 12px;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .Style_Check:active {
+      transform: scale(0.9);
+    }
+
+    .Style_Check.done {
+      background: rgba(52, 211, 153, 0.12);
+      border-color: var(--Accent_04);
+      color: var(--Accent_04);
+    }
+
+    /* ==============================
+       COMPONENTS: INPUT
+       ============================== */
+    .Style_Input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: var(--Radius_03);
+      border: 1px solid var(--Color_10);
+      background: var(--Color_02);
+      color: var(--Color_04);
+      font-size: 15px;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+
+    .Style_Input:focus {
+      outline: none;
+      border-color: var(--Accent_01) !important;
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+    }
+
+    .Style_InputSm {
+      padding: 8px 10px;
+      font-size: 13px;
+      width: 90px;
+      text-align: center;
+      border-radius: var(--Radius_02);
+      border: 1px solid var(--Color_10);
+      background: var(--Color_02);
+      color: var(--Color_04);
+      font-family: inherit;
+    }
+
+    .Style_InputSm:focus {
+      outline: none;
+      border-color: var(--Accent_01) !important;
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+    }
+
+    select.Style_Input {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%234a4e5c' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+      cursor: pointer;
+    }
+
+    /* ==============================
+       COMPONENTS: BUTTONS
+       ============================== */
+    .Style_Btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--Radius_04);
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: transform 0.1s;
+    }
+
+    .Style_Btn:active {
+      transform: scale(0.98);
+    }
+
+    .Style_BtnPrimary {
+      background: linear-gradient(135deg, var(--Accent_01), var(--Accent_02));
+      color: #fff;
+    }
+
+    .Style_BtnGhost {
+      background: transparent;
+      color: var(--Color_05);
+      padding: 12px;
+    }
+
+    .Style_BtnSm {
+      width: auto;
+      padding: 6px 14px;
+      font-size: 12px;
+      border-radius: var(--Radius_02);
+    }
+
+    .Style_BtnOutline {
+      background: transparent;
+      border: 1px solid var(--Color_10);
+      color: var(--Color_04);
+    }
+
+    .Style_BtnDanger {
+      color: var(--Accent_06);
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    .Style_BtnAdd {
+      background: none;
+      border: 1px dashed rgba(255, 255, 255, 0.08);
+      color: var(--Color_05);
+      font-size: 12px;
+      padding: 8px;
+      border-radius: var(--Radius_02);
+      width: 100%;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .Style_BtnAdd:active {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* ==============================
+       COMPONENTS: MODAL
+       ============================== */
+    .Style_ModalBg {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 30;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .Style_Modal {
+      width: 100%;
+      max-width: 480px;
+      background: var(--Color_03);
+      border-radius: 20px 20px 0 0;
+      padding: 24px 20px 36px;
+      animation: slideUp 0.25s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .Style_Modal h3 {
+      font-size: 17px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    /* ==============================
+       COMPONENTS: TAGS / PILLS
+       ============================== */
+    .Style_Pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: var(--Radius_01);
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .Style_TagActive {
+      background: rgba(52, 211, 153, 0.1);
+      color: var(--Accent_04);
+    }
+
+    .Style_TagCancelled {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--Accent_06);
+    }
+
+    /* ==============================
+       COMPONENTS: MISC
+       ============================== */
+    .Style_Empty {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--Color_07);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .Style_Del {
+      background: none;
+      border: none;
+      color: var(--Color_07);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 0 0 8px;
+      line-height: 1;
+    }
+
+    .Style_Del:active {
+      color: var(--Accent_06);
+    }
+
+    .Style_Divider {
+      height: 0.5px;
+      background: var(--Color_09);
+      margin: 14px 0;
+    }
+
+    .Style_Grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* ==============================
+       COMPONENTS: MODAL TYPE PICKER
+       ============================== */
+    .Style_TypeGrid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .Style_TypeBtn {
+      padding: 10px 4px;
+      border-radius: var(--Radius_02);
+      border: 1px solid var(--Color_10);
+      background: var(--Color_02);
+      color: var(--Color_08);
+      font-size: 11px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.1s;
+    }
+
+    .Style_TypeBtn.selected {
+      border-color: var(--Accent_01);
+      color: var(--Accent_03);
+      background: rgba(99, 102, 241, 0.06);
+    }
+
+    /* ==============================
+       UTILITIES
+       ============================== */
+    .u-text-center { text-align: center; }
+    .u-text-right  { text-align: right; }
+    .u-muted       { color: var(--Color_05); }
+    .u-faint       { color: var(--Color_06); }
+    .u-success     { color: var(--Accent_04); }
+    .u-danger      { color: var(--Accent_06); }
+    .u-warning     { color: var(--Accent_05); }
+    .u-info        { color: var(--Accent_07); }
+    .u-accent      { color: var(--Accent_03); }
+    .u-purple      { color: var(--Accent_08); }
+    .u-bold        { font-weight: 600; }
+    .u-strike      { text-decoration: line-through; }
+    .u-dim         { opacity: 0.6; }
+    .u-mb-sm       { margin-bottom: 6px; }
+    .u-mb-md       { margin-bottom: 12px; }
+    .u-mb-lg       { margin-bottom: 16px; }
+    .u-mt-sm       { margin-top: 6px; }
+    .u-mt-md       { margin-top: 10px; }
+    .u-fs-xs       { font-size: 10px; }
+    .u-fs-sm       { font-size: 11px; }
+    .u-fs-md       { font-size: 13px; }
+    .u-fs-lg       { font-size: 15px; }
+    .u-fs-xl       { font-size: 18px; }
+    .u-fs-2xl      { font-size: 22px; }
+    .u-fs-3xl      { font-size: 28px; }
+    .u-fs-4xl      { font-size: 32px; }
+  </style>
+</head>
+
+<body>
+  <!-- TOPBAR -->
+  <div class="Style_Topbar">
+    <div class="Style_Topbar_Brand">
+      <div class="Style_Topbar_Icon">H</div>
+      <span class="Style_Topbar_Name">BudgetHub</span>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <button class="Style_Btn Style_BtnSm Style_BtnOutline" onclick="exportAll()" style="font-size:11px;">Export</button>
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="Style_Tabs" id="tabs"></div>
+
+  <!-- MAIN CONTENT -->
+  <div class="Style_Container" id="app"></div>
+
+  <!-- MODAL ROOT -->
+  <div id="modal-root"></div>
+
+<script>
+/* ==============================================================
+   CONSTANTS
+   ============================================================== */
+const STORAGE_KEY = "budgethub-v3";
+const MONTH_START_DAY = 24;
+const SUBSCRIPTION_BUDGET = 1500;
+
+/* Default fixed expenses template — generic, no PII */
+const DEFAULT_FIXED = [
+  { id: "housing",         name: "Housing / Rent",        amount: 0, type: "simple"  },
+  { id: "vehicle_lease",   name: "Vehicle Lease",         amount: 0, type: "simple"  },
+  { id: "vehicle_running", name: "Vehicle Running Costs",  amount: 0, type: "tracked" },
+  { id: "connectivity",    name: "Connectivity / Phone",   amount: 0, type: "simple"  },
+  { id: "dependent_1",     name: "Dependent Allowance 1",  amount: 0, type: "simple"  },
+  { id: "dependent_2",     name: "Dependent Allowance 2",  amount: 0, type: "simple"  },
+  { id: "loan",            name: "Loan Repayment",         amount: 0, type: "simple"  },
+  { id: "obligation_1",    name: "Financial Obligation 1",  amount: 0, type: "simple"  },
+  { id: "obligation_2",    name: "Financial Obligation 2",  amount: 0, type: "simple"  },
+];
+
+/* ==============================================================
+   STATE
+   ============================================================== */
+let state = {
+  tab: "fixed",
+  viewOffset: 0,
+  fixedConfig: [],   // User-configurable list of fixed expenses
+  fixed: {},         // { monthKey: { expenseId: { paid, actual, paidDate, entries } } }
+  subs: [],          // Subscription objects
+  subNotes: {},      // { monthKey: [{ text, done }] }
+  health: {},        // { monthKey: { entries, budget } }
+  outing: {},        // { monthKey: { entries, budget } }
+  notificationsEnabled: false,
+};
+
+/* ==============================================================
+   PERSISTENCE
+   ============================================================== */
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      Object.assign(state, parsed);
+    }
+  } catch (e) {
+    console.warn("Failed to load state:", e);
+  }
+
+  // Ensure fixedConfig exists (migration from older version or first run)
+  if (!state.fixedConfig || state.fixedConfig.length === 0) {
+    state.fixedConfig = JSON.parse(JSON.stringify(DEFAULT_FIXED));
+  }
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    console.warn("Failed to save state:", e);
+  }
+}
+
+/* ==============================================================
+   DATE UTILITIES
+   ============================================================== */
+function getBudgetMonth(offset) {
+  const d = new Date();
+  d.setMonth(d.getMonth() + (offset || 0));
+
+  if (d.getDate() >= MONTH_START_DAY) {
+    return {
+      year: d.getFullYear(),
+      month: d.getMonth(),
+      start: new Date(d.getFullYear(), d.getMonth(), MONTH_START_DAY),
+      end: new Date(d.getFullYear(), d.getMonth() + 1, MONTH_START_DAY - 1),
+    };
+  }
+
+  const prev = new Date(d.getFullYear(), d.getMonth() - 1, MONTH_START_DAY);
+  return {
+    year: prev.getFullYear(),
+    month: prev.getMonth(),
+    start: prev,
+    end: new Date(d.getFullYear(), d.getMonth(), MONTH_START_DAY - 1),
+  };
+}
+
+function monthKey(bm) {
+  return `${bm.year}-${String(bm.month + 1).padStart(2, "0")}`;
+}
+
+function monthLabel(bm) {
+  const opts = { day: "numeric", month: "short" };
+  const optsY = { day: "numeric", month: "short", year: "numeric" };
+  return `${bm.start.toLocaleDateString("en-GB", opts)} – ${bm.end.toLocaleDateString("en-GB", optsY)}`;
+}
+
+function dayKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function formatDay(s) {
+  return new Date(s + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+}
+
+/* ==============================================================
+   NUMBER UTILITIES
+   ============================================================== */
+function fmt(n) {
+  return Number(n).toFixed(2).replace(/\.00$/, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function parsePositiveNum(val) {
+  const n = parseFloat(val);
+  if (isNaN(n) || n < 0) return null;
+  return Math.round(n * 100) / 100;
+}
+
+function parsePosInt(val) {
+  const n = parseInt(val, 10);
+  if (isNaN(n) || n < 1) return null;
+  return n;
+}
+
+/* ==============================================================
+   UI UTILITIES
+   ============================================================== */
+function closeModal() {
+  document.getElementById("modal-root").innerHTML = "";
+}
+
+function monthNavHTML(bm) {
+  const canGoForward = state.viewOffset < 0;
+  let html = `
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:14px;">
+      <button onclick="state.viewOffset--;render();"
+        style="background:none;border:none;color:var(--Color_05);font-size:20px;cursor:pointer;padding:6px 10px;">‹</button>
+      <div class="u-text-center" style="min-width:160px;">
+        <div class="Style_Label">Budget cycle</div>
+        <div class="u-fs-md" style="font-weight:500;color:var(--Color_08);">${monthLabel(bm)}</div>
+      </div>
+      <button onclick="if(${canGoForward}){state.viewOffset++;render();}"
+        style="background:none;border:none;color:${canGoForward ? 'var(--Color_05)' : 'var(--Color_01)'};font-size:20px;cursor:pointer;padding:6px 10px;"
+        ${canGoForward ? '' : 'disabled'}>›</button>
+    </div>`;
+
+  if (state.viewOffset !== 0) {
+    html += `
+      <div class="u-text-center u-mb-md">
+        <button onclick="state.viewOffset=0;render();"
+          style="background:none;border:1px solid rgba(99,102,241,.2);color:var(--Accent_03);font-size:12px;padding:5px 16px;border-radius:var(--Radius_06);cursor:pointer;font-family:inherit;">
+          Back to current
+        </button>
+      </div>`;
+  }
+
+  return html;
+}
+
+/* ==============================================================
+   FIXED EXPENSE DATA HELPERS
+   ============================================================== */
+function getFixedData(mk, id) {
+  if (!state.fixed[mk]) state.fixed[mk] = {};
+  if (!state.fixed[mk][id]) {
+    state.fixed[mk][id] = { paid: false, actual: null, paidDate: null, entries: [] };
+  }
+  return state.fixed[mk][id];
+}
+
+function getFixedActual(mk, fixedItem) {
+  const d = getFixedData(mk, fixedItem.id);
+  if (fixedItem.type === "tracked") {
+    return (d.entries || []).reduce((sum, e) => sum + e.amt, 0);
+  }
+  return (d.actual !== null && d.actual !== undefined) ? d.actual : fixedItem.amount;
+}
+
+/* ==============================================================
+   SAVINGS CALCULATION (ALL SOURCES)
+   ============================================================== */
+function calcSavings(mk) {
+  const sv = { fixed: 0, tracked: 0, subs: 0, health: 0, outing: 0, total: 0 };
+
+  state.fixedConfig.forEach(f => {
+    if (f.type === "tracked") {
+      const spent = (getFixedData(mk, f.id).entries || []).reduce((s, e) => s + e.amt, 0);
+      sv.tracked += Math.max(f.amount - spent, 0);
+    } else {
+      const d = getFixedData(mk, f.id);
+      if (d.paid) {
+        const act = (d.actual !== null && d.actual !== undefined) ? d.actual : f.amount;
+        sv.fixed += Math.max(f.amount - act, 0);
+      }
+    }
+  });
+
+  const subTotal = state.subs
+    .filter(s => s.active)
+    .reduce((sum, s) => sum + (s.cycle === "yearly" ? s.cost / 12 : s.cost), 0);
+  sv.subs = Math.max(SUBSCRIPTION_BUDGET - subTotal, 0);
+
+  const h = state.health[mk] || { entries: [], budget: 0 };
+  sv.health = Math.max(h.budget - (h.entries || []).reduce((s, e) => s + e.amt, 0), 0);
+
+  const o = state.outing[mk] || { entries: [], budget: 0 };
+  sv.outing = Math.max(o.budget - (o.entries || []).reduce((s, e) => s + e.amt, 0), 0);
+
+  sv.total = sv.fixed + sv.tracked + sv.subs + sv.health + sv.outing;
+  return sv;
+}
+
+/* ==============================================================
+   MAIN RENDER
+   ============================================================== */
+function render() {
+  const tabDefs = [
+    ["fixed", "Fixed"],
+    ["subs", "Subscriptions"],
+    ["health", "Health & Outing"],
+    ["savings", "Savings"],
+  ];
+
+  document.getElementById("tabs").innerHTML = tabDefs
+    .map(([id, label]) =>
+      `<button class="Style_Tab ${state.tab === id ? 'active' : ''}"
+        onclick="state.tab='${id}';render();">${label}</button>`)
+    .join("");
+
+  const app = document.getElementById("app");
+
+  switch (state.tab) {
+    case "fixed":   renderFixed(app);   break;
+    case "subs":    renderSubs(app);    break;
+    case "health":  renderHealth(app);  break;
+    case "savings": renderSavings(app); break;
+  }
+
+  checkNotifications();
+}
+
+/* ==============================================================
+   TAB 1: FIXED EXPENSES
+   ============================================================== */
+function renderFixed(el) {
+  const bm = getBudgetMonth(state.viewOffset);
+  const mk = monthKey(bm);
+  const config = state.fixedConfig;
+
+  let totalDefault = 0;
+  let totalActual = 0;
+  let totalPaid = 0;
+
+  config.forEach(f => {
+    totalDefault += f.amount;
+    const actual = getFixedActual(mk, f);
+    totalActual += actual;
+    const d = getFixedData(mk, f.id);
+    if (d.paid || f.type === "tracked") totalPaid += actual;
+  });
+
+  let html = `<div style="padding-top:14px;animation:fadeIn .2s ease;">`;
+  html += monthNavHTML(bm);
+
+  // Summary cards
+  html += `
+    <div class="Style_Grid2 u-mb-md">
+      <div class="Style_Card u-text-center" style="margin:0;">
+        <div class="Style_Label">Total</div>
+        <div class="u-fs-2xl u-bold">${fmt(totalActual)}</div>
+        <div class="u-fs-sm u-muted">default: ${fmt(totalDefault)}</div>
+      </div>
+      <div class="Style_Card u-text-center" style="margin:0;">
+        <div class="Style_Label">Paid</div>
+        <div class="u-fs-2xl u-bold u-success">${fmt(totalPaid)}</div>
+      </div>
+    </div>`;
+
+  // Manage fixed expenses button
+  html += `
+    <button class="Style_BtnAdd u-mb-md" onclick="openManageFixed();">
+      ⚙ Manage fixed expense categories
+    </button>`;
+
+  // Each fixed expense
+  config.forEach(f => {
+    const d = getFixedData(mk, f.id);
+
+    if (f.type === "tracked") {
+      // Tracked type: mini expense log
+      const spent = (d.entries || []).reduce((s, e) => s + e.amt, 0);
+      const pct = f.amount > 0 ? spent / f.amount : 0;
+      const left = Math.max(f.amount - spent, 0);
+      const barColor = pct > 1 ? 'var(--Accent_06)' : pct > 0.8 ? 'var(--Accent_05)' : 'var(--Accent_07)';
+
+      html += `
+        <div class="Style_Card">
+          <div style="display:flex;justify-content:space-between;align-items:center;" class="u-mb-sm">
+            <div>
+              <div class="u-fs-md u-bold">🚗 ${f.name}</div>
+              <div class="u-fs-sm u-faint">Budget: ${fmt(f.amount)}</div>
+            </div>
+            <div class="u-text-right">
+              <div class="u-fs-xl u-bold" style="color:${pct > 1 ? 'var(--Accent_06)' : 'var(--Color_04)'};">${fmt(spent)}</div>
+              <div class="u-fs-xs" style="color:${pct > 1 ? 'var(--Accent_06)' : 'var(--Color_05)'};">
+                ${pct > 1 ? 'Over ' + fmt(spent - f.amount) : 'Left: ' + fmt(left)}
+              </div>
+            </div>
+          </div>
+          <div class="Style_BarBg">
+            <div class="Style_BarFg" style="width:${Math.min(pct * 100, 100)}%;background:${barColor};"></div>
+          </div>
+          <button class="Style_BtnAdd u-mt-md" onclick="openAddTrackedExpense('${mk}','${f.id}');">
+            + Add expense
+          </button>`;
+
+      if (d.entries && d.entries.length > 0) {
+        html += `<div class="u-mt-sm">`;
+        d.entries.slice().reverse().forEach(e => {
+          html += `
+            <div class="Style_MiniEntry">
+              <div>
+                <span class="u-bold">${fmt(e.amt)}</span>
+                ${e.note ? ` <span class="u-faint">— ${e.note}</span>` : ''}
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span class="u-faint">${e.date ? formatDay(e.date) : ''}</span>
+                <button class="Style_Del" onclick="deleteTrackedExpense('${mk}','${f.id}',${e.ts});">×</button>
+              </div>
+            </div>`;
+        });
+        html += `</div>`;
+      }
+
+      html += `</div>`;
+
+    } else {
+      // Simple type: single payment with editable amount
+      const actual = (d.actual !== null) ? d.actual : f.amount;
+      const saved = d.paid ? Math.max(f.amount - actual, 0) : 0;
+
+      html += `
+        <div class="Style_Card${d.paid ? ' u-dim' : ''}">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="Style_Check${d.paid ? ' done' : ''}"
+              onclick="toggleFixedPaid('${mk}','${f.id}',${f.amount});">
+              ${d.paid ? '✓' : ''}
+            </div>
+            <div style="flex:1;">
+              <div class="u-fs-md u-bold${d.paid ? ' u-strike u-faint' : ''}">${f.name}</div>
+              <div class="u-fs-sm u-faint">
+                Default: ${fmt(f.amount)}
+                ${saved > 0 ? ' · <span class="u-success">Saved ' + fmt(saved) + '</span>' : ''}
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <input type="number"
+                class="Style_InputSm"
+                value="${actual}"
+                onchange="updateFixedActual('${mk}','${f.id}',this.value);"
+                inputmode="numeric"
+                min="0"
+                ${d.paid ? 'disabled style="opacity:.4;"' : ''}>
+              <span class="u-fs-sm u-faint">AED</span>
+            </div>
+          </div>
+          ${d.paid && d.paidDate ? `<div class="u-fs-xs u-faint" style="margin-top:6px;margin-left:34px;">Paid ${d.paidDate}</div>` : ''}
+        </div>`;
+    }
+  });
+
+  // History
+  html += `<div class="Style_Divider"></div>`;
+  html += `<div class="Style_Label u-mb-sm">HISTORY</div>`;
+
+  const historyKeys = Object.keys(state.fixed).sort().reverse().filter(k => k !== mk).slice(0, 6);
+
+  if (historyKeys.length === 0) {
+    html += `<div class="Style_Empty">History appears after first completed month.</div>`;
+  } else {
+    historyKeys.forEach(hk => {
+      let tp = 0;
+      config.forEach(f => {
+        const d = getFixedData(hk, f.id);
+        if (f.type === "tracked") {
+          tp += (d.entries || []).reduce((s, e) => s + e.amt, 0);
+        } else if (d.paid) {
+          tp += (d.actual !== null ? d.actual : f.amount);
+        }
+      });
+      html += `
+        <div class="Style_Card" style="padding:12px 16px;">
+          <div style="display:flex;justify-content:space-between;">
+            <div class="u-fs-md u-bold">${hk}</div>
+            <div class="u-fs-lg u-bold">${fmt(tp)}</div>
+          </div>
+        </div>`;
+    });
+  }
+
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+/* Fixed expense actions */
+function toggleFixedPaid(mk, id, defaultAmt) {
+  const d = getFixedData(mk, id);
+  d.paid = !d.paid;
+  if (d.paid) {
+    d.paidDate = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    if (d.actual === null) d.actual = defaultAmt;
+  }
+  saveState();
+  render();
+}
+
+function updateFixedActual(mk, id, val) {
+  const num = parsePositiveNum(val);
+  if (num === null) return;
+  getFixedData(mk, id).actual = num;
+  saveState();
+}
+
+/* Tracked expense modal */
+function openAddTrackedExpense(mk, fixedId) {
+  let selectedType = "";
+  const types = ["Fuel", "Toll", "Fine", "Parking", "Wash", "Repair", "Tyre", "Other"];
+
+  document.getElementById("modal-root").innerHTML = `
+    <div class="Style_ModalBg" onclick="if(event.target===this)closeModal();">
+      <div class="Style_Modal">
+        <h3>Add expense</h3>
+        <div class="u-mb-md">
+          <div class="Style_Label u-mb-sm">Amount</div>
+          <input id="te-amt" type="number" class="Style_Input" placeholder="0" inputmode="decimal" min="0" autofocus>
+        </div>
+        <div class="u-mb-md">
+          <div class="Style_Label u-mb-sm">Type</div>
+          <div class="Style_TypeGrid">
+            ${types.map(t => `<button class="Style_TypeBtn" data-type="${t}" onclick="selectTrackedType(this,'${t}');">${t}</button>`).join("")}
+          </div>
+        </div>
+        <div class="u-mb-lg">
+          <div class="Style_Label u-mb-sm">Note (optional)</div>
+          <input id="te-note" type="text" class="Style_Input" placeholder="e.g. Station name"
+            onkeydown="if(event.key==='Enter')submitTrackedExpense('${mk}','${fixedId}');">
+        </div>
+        <button class="Style_Btn Style_BtnPrimary" onclick="submitTrackedExpense('${mk}','${fixedId}');">Add</button>
+        <button class="Style_Btn Style_BtnGhost" onclick="closeModal();">Cancel</button>
+      </div>
+    </div>`;
+
+  // Store selection in closure via data attribute
+  window._trackedTypeSelection = "";
+  setTimeout(() => document.getElementById("te-amt")?.focus(), 150);
+}
+
+function selectTrackedType(btn, type) {
+  window._trackedTypeSelection = type;
+  document.querySelectorAll(".Style_TypeBtn").forEach(b => b.classList.remove("selected"));
+  btn.classList.add("selected");
+}
+
+function submitTrackedExpense(mk, fixedId) {
+  const amt = parsePositiveNum(document.getElementById("te-amt").value);
+  if (amt === null || amt === 0) { alert("Enter a valid positive amount."); return; }
+
+  const noteEl = document.getElementById("te-note");
+  const selectedType = window._trackedTypeSelection || "";
+  const note = [selectedType, noteEl.value.trim()].filter(Boolean).join(" — ");
+
+  const d = getFixedData(mk, fixedId);
+  d.entries.push({ amt, note: note || null, date: dayKey(new Date()), ts: Date.now() });
+
+  window._trackedTypeSelection = "";
+  saveState();
+  closeModal();
+  render();
+}
+
+function deleteTrackedExpense(mk, fixedId, ts) {
+  const d = getFixedData(mk, fixedId);
+  d.entries = d.entries.filter(e => e.ts !== ts);
+  saveState();
+  render();
+}
+
+/* Manage fixed expense categories */
+function openManageFixed() {
+  let listHTML = state.fixedConfig.map((f, i) => `
+    <div class="Style_Row">
+      <div>
+        <div class="u-fs-md u-bold">${f.name}</div>
+        <div class="u-fs-sm u-muted">${fmt(f.amount)} · ${f.type === "tracked" ? "Multi-entry" : "Single payment"}</div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="Style_Btn Style_BtnSm Style_BtnOutline" onclick="closeModal();openEditFixed(${i});">Edit</button>
+        <button class="Style_Del" onclick="deleteFixedCategory(${i});">×</button>
+      </div>
+    </div>`).join("");
+
+  document.getElementById("modal-root").innerHTML = `
+    <div class="Style_ModalBg" onclick="if(event.target===this)closeModal();">
+      <div class="Style_Modal">
+        <h3>Manage Fixed Expenses</h3>
+        ${listHTML}
+        <div class="Style_Divider"></div>
+        <button class="Style_Btn Style_BtnPrimary" onclick="closeModal();openAddFixedCategory();">+ Add new category</button>
+        <button class="Style_Btn Style_BtnGhost" onclick="closeModal();">Done</button>
+      </div>
+    </div>`;
+}
+
+function openAddFixedCategory() {
+  document.getElementById("modal-root").innerHTML = `
+    <div class="Style_ModalBg" onclick="if(event.target===this)closeModal();">
+      <div class="Style_Modal">
+        <h3>Add category</h3>
+        <div class="u-mb-md">
+          <div class="Style_Label u-mb-sm">Name</div>
+          <input id="fc-name" type="text" class="Style_Input" placeholder="e.g. Insurance" autofocus>
+        </div>
+        <div class="u-mb-md">
+          <div class="Style_Label u-mb-sm">Default amount</div>
+          <input id="fc-amt" type="number" class="Style_Input" placeholder="0" inputmode="decimal" min="0">
+        </div>
+        <div class="u-mb-lg">
+          <div class="Style_Label u-mb-sm">Payment type</div>
+          <select id="fc-type" class="Style_Input">
+            <option value="simple">Single payment per month</option>
+            <option value="tracked">Multiple entries (tracked)</option>
+          </select>
+        </div>
+        <button class="Style_Btn Style_BtnPrimary" onclick="submitAddFixedCategory();">Add</button>
+        <button class="Style_Btn Style_BtnGhost" onclick="closeModal();">Cancel</button>
+      </div>
+    </div>`;
+}
+
+function submitAddFixedCategory() {
+  const name = document.getElementById("fc-name").value.trim();
+  const amount = parsePositiveNum(document.getElementById("fc-amt").value) || 0;
+  const type = document.getElementById("fc-type").value;
+  if (!name) { alert("Enter a name."); return; }
+
+  const id = name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "") + "_" + Date.now();
+  state.fixedConfig.push({ id, name, amount, type });
+  saveState();
+  closeModal();
+  render();
+}
+
+function openEditFixed(index) {
+  const f = state.fixedConfig[index];
+  if (!f) return;
+
+  document.getElementById("modal-root").innerHTML = `
+    <div class="Style_ModalBg" onclick="if(event.target===this)closeModal();">
+      <div class="Style_Modal">
+        <h3>Edit: ${f.name}</h3>
+        <div class="u-mb-md">
+          <div class="Style_Label u-mb-sm">Name</div>
+          <input id="ef-name" type="text" class="Style_Input" value="${f.name}">
+        </div>
+        <div class="u-mb-md">
+          <div class="Style_Label u-mb-sm">Default amount</div>
+          <input id="ef-amt" type="number" class="Style_Input" value="${f.amount}" inputmode="decimal" min="0">
+        </div>
+        <div class="u-mb-lg">
+          <div class="Style_Label u-mb-sm">Payment type</div>
+          <select id="ef-type" class="Style_Input">
+            <option value="simple" ${f.type === "simple" ? "selected" : ""}>Single payment</option>
+            <option value="tracked" ${f.type === "tracked" ? "selected" : ""}>Multiple entries</option>
+          </select>
+        </div>
+        <button class="Style_Btn Style_BtnPrimary" onclick="submitEditFixed(${index});">Save</button>
+        <button class="Style_Btn Style_BtnGhost" onclick="closeModal();">Cancel</button>
+      </div>
+    </div>`;
+}
+
+function submitEditFixed(index) {
+  const f = state.fixedConfig[index];
+  if (!f) return;
+  f.name = document.getElementById("ef-name").value.trim() || f.name;
+  f.amount = parsePositiveNum(document.getElementById("ef-amt").value) || 0;
+  f.type = document.getElementById("ef-type").value;
+  saveState();
+  closeModal();
+  render();
+}
+
+function deleteFixedCategory(index) {
+  if (!confirm("Delete this category? History data for it will remain.")) return;
+  state.fixedConfig.splice(index, 1);
+  saveState();
+  closeModal();
+  render();
+}
+
+/* ==============================================================
+   TAB 2: SUBSCRIPTIONS
+   ============================================================== */
+function renderSubs(el) {
+  const bm = getBudgetMonth(state.viewOffset);
+  const mk = monthKey(bm);
+  const today = new Date();
+
+  const active = state.subs.filter(s => s.active);
+  const cancelled = state.subs.filter(s => !s.active);
+  const totalMonthly = active.reduce((sum, s) => sum + (s.cycle === "yearly" ? s.cost / 12 : s.cost), 0);
+
+  const dueSoon = active.filter(s => {
+    const bd = new Date(today.getFullYear(), today.getMonth(), s.billingDay);
+    if (bd < today) bd.setMonth(bd.getMonth() + 1);
+    const diff = Math.ceil((bd - today) / 86400000);
+    return diff <= 3 && diff >= 0;
+  });
+
+  let html = `<div style="padding-top:14px;animation:fadeIn .2s ease;">`;
+
+  // Summary
+  html += `
+    <div class="Style_Grid2 u-mb-md">
+      <div class="Style_Card u-text-center" style="margin:0;">
+        <div class="Style_Label">Active</div>
+        <div class="u-fs-2xl u-bold">${active.length}</div>
+      </div>
+      <div class="Style_Card u-text-center" style="margin:0;">
+        <div class="Style_Label">Monthly cost</div>
+        <div class="u-fs-2xl u-bold u-accent">${fmt(totalMonthly)}</div>
+      </div>
+    </div>`;
+
+  // Due soon
+  if (dueSoon.length > 0) {
+    dueSoon.forEach(s => {
+      html += `
+        <div class="Style_Card Style_Card_Warning">
+          <div style="display:flex;justify-content:space-between;" class="u-fs-md">
+            <span class="u-bold">⚠️ ${s.name}</span>
+            <span class="u-warning">${fmt(s.cost)} — Day ${s.billingDay}</span>
+          </div>
+        </div>`;
+    });
+  }
+
+  // Notifications opt-in
+  html += `
+    <div style="display:flex;gap:6px;margin-bottom:14px;">
+      <button class="Style_Btn Style_BtnPrimary" onclick="openAddSubscription();" style="flex:2;padding:12px;">+ Add subscription</button>
+      <button class="Style_Btn Style_BtnSm Style_BtnOutline" onclick="enableNotifications();"
+        style="flex:1;font-size:11px;padding:12px;color:${state.notificationsEnabled ? 'var(--Accent_04)' : 'var(--Color_05)'};">
+        ${state.notificationsEnabled ? '🔔 On' : '🔕 Remind'}
+      </button>
+    </div>`;
+
+  // Monthly notes
+  if (!state.subNotes[mk]) state.subNotes[mk] = [];
+  const notes = state.subNotes[mk];
+
+  html += `
+    <div class="Style_Card">
+      <div style="display:flex;justify-content:space-between;align-items:center;" class="u-mb-sm">
+        <div class="Style_Label" style="margin:0;">MONTHLY NOTES</div>
+        <button onclick="openAddSubNote('${mk}');"
+          style="background:none;border:none;color:var(--Accent_03);font-size:20px;cursor:pointer;">+</button>
+      </div>`;
+
+  if (notes.length === 0) {
+    html += `<div class="u-fs-sm u-faint" style="padding:8px 0;">e.g. "Cancel Netflix" or "Try Canva free trial"</div>`;
+  } else {
+    notes.forEach((n, i) => {
+      html += `
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:0.5px solid var(--Color_09);">
+          <div class="Style_Check${n.done ? ' done' : ''}" onclick="toggleSubNote('${mk}',${i});">${n.done ? '✓' : ''}</div>
+          <span style="flex:1;" class="u-fs-md${n.done ? ' u-strike u-faint' : ''}">${n.text}</span>
+          <button class="Style_Del" onclick="deleteSubNote('${mk}',${i});">×</button>
+        </div>`;
+    });
+  }
+
+  html += `</div>`;
+
+  // Active subscriptions
+  if (active.length > 0) {
+    html += `<div class="Style_Label" style="margin:12px 0 8px;">ACTIVE</div>`;
+    active.forEach(s => {
+      const bd = new Date(today.getFullYear(), today.getMonth(), s.billingDay);
+      if (bd < today) bd.setMonth(bd.getMonth() + 1);
+      const daysUntil = Math.ceil((bd - today) / 86400000);
+
+      html += `
+        <div class="Style_Card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div class="u-fs-md u-bold">${s.name}</div>
+              <div class="u-fs-sm u-muted">
+                Day ${s.billingDay} · ${s.cycle}
+                ${daysUntil <= 7 ? ` · <span class="u-warning">${daysUntil}d</span>` : ''}
+              </div>
+            </div>
+            <div class="u-text-right">
+              <div class="u-fs-lg u-bold">${fmt(s.cost)}</div>
+              <span class="Style_Pill Style_TagActive">Active</span>
+            </div>
+          </div>
+          ${s.notes ? `<div class="u-fs-sm u-muted u-mt-sm" style="padding-top:6px;border-top:0.5px solid var(--Color_09);">📝 ${s.notes}</div>` : ''}
+          <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">
+            <button class="Style_Btn Style_BtnSm Style_BtnOutline" onclick="openEditSubscription(${s.id});">Edit</button>
+            <button class="Style_Btn Style_BtnSm Style_BtnOutline" onclick="addToCalendar(${s.id});" style="color:var(--Accent_03);border-color:rgba(99,102,241,.2);">📅 Calendar</button>
+            <button class="Style_Btn Style_BtnSm Style_BtnOutline Style_BtnDanger" onclick="toggleSubActive(${s.id});">Cancel</button>
+          </div>
+        </div>`;
+    });
+  }
+
+  // Cancelled
+  if (cancelled.length > 0) {
+    html += `<div class="Style_Label" style="margin:12px 0 8px;">CANCELLED</div>`;
+    cancelled.forEach(s => {
+      html += `
+        <div class="Style_Card u-dim">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="u-fs-md u-strike">${s.name}</div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span class="Style_Pill Style_TagCancelled">Off</span>
+              <button class="Style_Btn Style_BtnSm Style_BtnOutline" onclick="toggleSubActive(${s.id});" style="font-size:10px;padding:4px 10px;">Reactivate</button>
+              <button class="Style_Del" onclick="deleteSubscription(${s.id});">×</button>
+            </div>
+          </div>
+        </div>`;
+    });
+  }
+
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+/* Subscription actions */
+function openAddSubscription() {
+  document.getElementById("modal-root").innerHTML = `
+    <div class="Style_ModalBg" onclick="if(event.target===this)closeModal();">
+      <div class="Style_Modal">
+        <h3>Add subscription</h3>
+        <div class="u-mb-md"><div class="Style_Label u-mb-sm">App / Service</div>
+          <input id="s-name" type="text" class="Style_Input" placeholder="e.g. Streaming, Design tool" autofocus></div>
+        <div class="u-mb-md"><div class="Style_Label u-mb-sm">Cost</div>
+          <input id="s-cost" type="number" class="Style_Input" placeholder="0" inputmode="decimal" min="0"></div>
+        <div class="u-mb-md"><div class="Style_Label u-mb-sm">Billing day (1–31)</div>
+          <input id="s-day" type="number" class="Style_Input" placeholder="e.g. 15" min="1" max="31" inputmode="numeric"></div>
+        <div class="u-mb-md"><div class="Style_Label u-mb-sm">Cycle</div>
+          <select id="s-cycle" class="Style_Input"><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select></div>
+        <div class="u-mb-lg"><div class="Style_Label u-mb-sm">Notes</div>
+          <input id="s-notes" type="text" class="Style_Input" placeholder="e.g. Family plan, cancel after trial"></div>
+        <button class="Style_Btn Style_BtnPrimary" onclick="submitAddSubscription();">Add</button>
+        <button class="Style_Btn Style_BtnGhost" onclick="closeModal();">Cancel</button>
+      </div>
+    </div>`;
+}
+
+function submitAddSubscription() {
+  const name = document.getElementById("s-name").value.trim();
+  const cost = parsePositiveNum(document.getElementById("s-cost").value);
+  const day = parsePosInt(document.getElementById("s-day").value);
+  const cycle = document.getElementById("s-cycle").value;
+  const notes = document.getElementById("s-notes").value.trim();
+
+  if (!name) { alert("Enter a service name."); return; }
+  if (cost === null || cost === 0) { alert("Enter a valid cost."); return; }
+  if (day === null || day > 31) { alert("Enter a valid billing day (1–31)."); return; }
+
+  state.subs.push({
+    id: Date.now(), name, cost, billingDay: day,
+    cycle, active: true, notes: notes || null,
+  });
+  saveState();
+  closeModal();
+  render();
+}
+
+function openEditSubscription(id) {
+  const s = state.subs.find(x => x.id === id);
+  if (!s) return;
+
+  document.getElementById("modal-root").innerHTML = `
+    <div class="Style_ModalBg" onclick="if(event.target===this)closeModal();">
+      <div class="Style_Modal">
+        <h3>Edit: ${s.name}</h3>
+        <div class="u-mb-md"><div class="Style_Label u-mb-sm">Name</div>
+          <input id="e-name" type="text" class="Style_Input" value="${s.name}"></div>
+        <div class="u-mb-md"><div class="Style_Label u-mb-sm">Cost</div>
+          <input id="e-cost" type="number" class="Style_Input" value="${s.cost}" inputmode="decimal" min="0"></div>
+        <div class="u-mb-md"><div class="Style_Label u-mb-sm">Billing day</div>
+          <input id="e-day" type="number" class="Style_Input" value="${s.billingDay}" min="1" max="31" inputmode="numeric"></div>
+        <div class="u-mb-md"><div class="Style_Label u-mb-sm">Cycle</div>
+          <select id="e-cycle" class="Style_Input">
+            <option value="monthly" ${s.cycle === "monthly" ? "selected" : ""}>Monthly</option>
+            <option value="yearly" ${s.cycle === "yearly" ? "selected" : ""}>Yearly</option>
+          </select></div>
+        <div class="u-mb-lg"><div class="Style_Label u-mb-sm">Notes</div>
+          <input id="e-notes" type="text" class="Style_Input" value="${s.notes || ''}"></div>
+        <button class="Style_Btn Style_BtnPrimary" onclick="saveEditSubscription(${id});">Save</button>
+        <button class="Style_Btn Style_BtnGhost" onclick="closeModal();">Cancel</button>
+      </div>
+    </div>`;
+}
+
+function saveEditSubscription(id) {
+  const s = state.subs.find(x => x.id === id);
+  if (!s) return;
+
+  s.name = document.getElementById("e-name").value.trim() || s.name;
+  s.cost = parsePositiveNum(document.getElementById("e-cost").value) || s.cost;
+  s.billingDay = parsePosInt(document.getElementById("e-day").value) || s.billingDay;
+  s.cycle = document.getElementById("e-cycle").value;
+  s.notes = document.getElementById("e-notes").value.trim() || null;
+
+  saveState();
+  closeModal();
+  render();
+}
+
+function toggleSubActive(id) {
+  const s = state.subs.find(x => x.id === id);
+  if (s) { s.active = !s.active; saveState(); render(); }
+}
+
+function deleteSubscription(id) {
+  if (!confirm("Delete this subscription permanently?")) return;
+  state.subs = state.subs.filter(x => x.id !== id);
+  saveState();
+  render();
+}
+
+function addToCalendar(id) {
+  const s = state.subs.find(x => x.id === id);
+  if (!s) return;
+
+  const today = new Date();
+  let bd = new Date(today.getFullYear(), today.getMonth(), s.billingDay);
+  if (bd <= today) bd.setMonth(bd.getMonth() + 1);
+
+  const remind = new Date(bd);
+  remind.setDate(remind.getDate() - 3);
+
+  const pad = d => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+
+  const ics = [
+    "BEGIN:VCALENDAR", "VERSION:2.0",
+    "BEGIN:VEVENT",
+    `DTSTART:${pad(remind)}T090000`,
+    `DTEND:${pad(remind)}T093000`,
+    `SUMMARY:💳 ${s.name} due in 3 days (${fmt(s.cost)})`,
+    `DESCRIPTION:${s.name} - ${fmt(s.cost)} - Day ${s.billingDay}${s.notes ? ' - ' + s.notes : ''}`,
+    `RRULE:FREQ=${s.cycle === "yearly" ? "YEARLY" : "MONTHLY"}`,
+    "BEGIN:VALARM", "TRIGGER:-PT0M", "ACTION:DISPLAY",
+    `DESCRIPTION:${s.name} due soon`,
+    "END:VALARM", "END:VEVENT", "END:VCALENDAR",
+  ].join("\n");
+
+  const blob = new Blob([ics], { type: "text/calendar" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${s.name.replace(/\s+/g, '_')}_reminder.ics`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* Sub notes */
+function openAddSubNote(mk) {
+  document.getElementById("modal-root").innerHTML = `
+    <div class="Style_ModalBg" onclick="if(event.target===this)closeModal();">
+      <div class="Style_Modal">
+        <h3>Add note</h3>
+        <div class="u-mb-lg"><div class="Style_Label u-mb-sm">Note</div>
+          <input id="sn-text" type="text" class="Style_Input" placeholder="e.g. Cancel streaming service" autofocus
+            onkeydown="if(event.key==='Enter')submitSubNote('${mk}');"></div>
+        <button class="Style_Btn Style_BtnPrimary" onclick="submitSubNote('${mk}');">Add</button>
+        <button class="Style_Btn Style_BtnGhost" onclick="closeModal();">Cancel</button>
+      </div>
+    </div>`;
+}
+
+function submitSubNote(mk) {
+  const t = document.getElementById("sn-text").value.trim();
+  if (!t) return;
+  if (!state.subNotes[mk]) state.subNotes[mk] = [];
+  state.subNotes[mk].push({ text: t, done: false });
+  saveState();
+  closeModal();
+  render();
+}
+
+function toggleSubNote(mk, i) {
+  state.subNotes[mk][i].done = !state.subNotes[mk][i].done;
+  saveState();
+  render();
+}
+
+function deleteSubNote(mk, i) {
+  state.subNotes[mk].splice(i, 1);
+  saveState();
+  render();
+}
+
+/* ==============================================================
+   TAB 3: HEALTH & OUTING
+   ============================================================== */
+function renderHealth(el) {
+  const bm = getBudgetMonth(state.viewOffset);
+  const mk = monthKey(bm);
+
+  if (!state.health[mk]) state.health[mk] = { entries: [], budget: 0 };
+  if (!state.outing[mk]) state.outing[mk] = { entries: [], budget: 0 };
+
+  const hSpent = (state.health[mk].entries || []).reduce((s, e) => s + e.amt, 0);
+  const oSpent = (state.outing[mk].entries || []).reduce((s, e) => s + e.amt, 0);
+  const hSaved = Math.max(state.health[mk].budget - hSpent, 0);
+  const oSaved = Math.max(state.outing[mk].budget - oSpent, 0);
+
+  let html = `<div style="padding-top:14px;animation:fadeIn .2s ease;">`;
+  html += monthNavHTML(bm);
+
+  // Savings banner
+  html += `
+    <div class="Style_Card Style_Card_Savings">
+      <div class="Style_Label u-success">Shifted to savings</div>
+      <div class="u-fs-3xl u-bold u-success">${fmt(hSaved + oSaved)}</div>
+      <div class="u-fs-sm u-muted">Health: ${fmt(hSaved)} + Outing: ${fmt(oSaved)}</div>
+    </div>`;
+
+  html += renderBudgetSection("Health", "health", mk, state.health[mk], "var(--Accent_07)", "💊");
+  html += renderBudgetSection("Outing / Dining", "outing", mk, state.outing[mk], "var(--Accent_05)", "🍽️");
+
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+function renderBudgetSection(title, type, mk, data, color, icon) {
+  const spent = (data.entries || []).reduce((s, e) => s + e.amt, 0);
+  const left = Math.max(data.budget - spent, 0);
+  const pct = data.budget > 0 ? spent / data.budget : 0;
+  const over = spent > data.budget;
+
+  let html = `
+    <div class="Style_Card">
+      <div style="display:flex;justify-content:space-between;align-items:center;" class="u-mb-sm">
+        <div class="u-fs-lg u-bold">${icon} ${title}</div>
+        <div class="u-text-right">
+          <div class="u-fs-xl u-bold" style="color:${over ? 'var(--Accent_06)' : color};">
+            ${fmt(spent)} <span class="u-fs-sm u-muted" style="font-weight:400;">/ ${fmt(data.budget)}</span>
+          </div>
+        </div>
+      </div>
+      <div class="Style_BarBg">
+        <div class="Style_BarFg" style="width:${Math.min(pct * 100, 100)}%;background:${pct > 1 ? 'var(--Accent_06)' : pct > 0.8 ? 'var(--Accent_05)' : color};"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;" class="u-fs-sm u-muted u-mt-sm">
+        <span>${over ? 'Over ' + fmt(spent - data.budget) : 'Left: ' + fmt(left)}</span>
+        <span>${!over ? '→ ' + fmt(left) + ' savings' : ''}</span>
+      </div>
+      <button class="Style_BtnAdd u-mt-md" onclick="openAddBudgetEntry('${type}','${mk}');">+ Log expense</button>`;
+
+  if (data.entries && data.entries.length > 0) {
+    html += `<div class="u-mt-sm">`;
+    data.entries.slice().reverse().forEach(e => {
+      html += `
+        <div class="Style_MiniEntry">
+          <div>
+            <span class="u-bold">${fmt(e.amt)}</span>
+            ${e.note ? ` <span class="u-faint">— ${e.note}</span>` : ''}
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span class="u-faint">${e.date ? formatDay(e.date) : ''}</span>
+            <button class="Style_Del" onclick="deleteBudgetEntry('${type}','${mk}',${e.ts});">×</button>
+          </div>
+        </div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function openAddBudgetEntry(type, mk) {
+  document.getElementById("modal-root").innerHTML = `
+    <div class="Style_ModalBg" onclick="if(event.target===this)closeModal();">
+      <div class="Style_Modal">
+        <h3>Log ${type} expense</h3>
+        <div class="u-mb-md"><div class="Style_Label u-mb-sm">Amount</div>
+          <input id="be-amt" type="number" class="Style_Input" placeholder="0" inputmode="decimal" min="0" autofocus></div>
+        <div class="u-mb-lg"><div class="Style_Label u-mb-sm">Note (optional)</div>
+          <input id="be-note" type="text" class="Style_Input" placeholder="e.g. Clinic visit, dinner out"
+            onkeydown="if(event.key==='Enter')submitBudgetEntry('${type}','${mk}');"></div>
+        <button class="Style_Btn Style_BtnPrimary" onclick="submitBudgetEntry('${type}','${mk}');">Log it</button>
+        <button class="Style_Btn Style_BtnGhost" onclick="closeModal();">Cancel</button>
+      </div>
+    </div>`;
+}
+
+function submitBudgetEntry(type, mk) {
+  const amt = parsePositiveNum(document.getElementById("be-amt").value);
+  if (amt === null || amt === 0) { alert("Enter a valid positive amount."); return; }
+
+  const note = document.getElementById("be-note").value.trim();
+  const target = type === "health" ? state.health : state.outing;
+  if (!target[mk]) target[mk] = { entries: [], budget: 0 };
+  target[mk].entries.push({ amt, note: note || null, date: dayKey(new Date()), ts: Date.now() });
+
+  saveState();
+  closeModal();
+  render();
+}
+
+function deleteBudgetEntry(type, mk, ts) {
+  const target = type === "health" ? state.health : state.outing;
+  if (target[mk]) target[mk].entries = target[mk].entries.filter(e => e.ts !== ts);
+  saveState();
+  render();
+}
+
+/* ==============================================================
+   TAB 4: SAVINGS
+   ============================================================== */
+function renderSavings(el) {
+  const allKeys = new Set();
+  Object.keys(state.fixed || {}).forEach(k => allKeys.add(k));
+  Object.keys(state.health || {}).forEach(k => allKeys.add(k));
+  Object.keys(state.outing || {}).forEach(k => allKeys.add(k));
+  allKeys.add(monthKey(getBudgetMonth(0)));
+
+  const sorted = [...allKeys].sort().reverse();
+  let totalAll = 0;
+  const months = sorted.map(k => {
+    const s = calcSavings(k);
+    totalAll += s.total;
+    return { k, ...s };
+  });
+
+  let html = `
+    <div style="padding-top:14px;animation:fadeIn .2s ease;">
+      <div class="u-fs-lg u-bold u-mb-sm">Total Savings</div>
+      <div class="u-fs-sm u-muted u-mb-lg">From all budgets</div>
+      <div class="Style_Card Style_Card_Savings u-mb-lg">
+        <div class="Style_Label u-success">All-time savings</div>
+        <div class="u-fs-4xl u-bold u-success">${fmt(totalAll)}</div>
+      </div>`;
+
+  if (totalAll === 0) {
+    html += `<div class="Style_Empty">Savings appear as you spend under budget.</div>`;
+  } else {
+    months.filter(m => m.total > 0).forEach(m => {
+      const sources = [
+        { key: "fixed", label: "Fixed", val: m.fixed, color: "var(--Accent_01)" },
+        { key: "tracked", label: "Vehicle", val: m.tracked, color: "var(--Accent_07)" },
+        { key: "subs", label: "Subs", val: m.subs, color: "var(--Accent_08)" },
+        { key: "health", label: "Health", val: m.health, color: "var(--Accent_07)" },
+        { key: "outing", label: "Outing", val: m.outing, color: "var(--Accent_05)" },
+      ].filter(s => s.val > 0);
+
+      html += `
+        <div class="Style_Card" style="padding:14px 16px;">
+          <div style="display:flex;justify-content:space-between;" class="u-mb-sm">
+            <div class="u-fs-md u-bold">${m.k}</div>
+            <div class="u-fs-lg u-bold u-success">+${fmt(m.total)}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            ${sources.map(s => `
+              <div style="flex:1;min-width:55px;padding:5px;background:${s.color}0d;border-radius:var(--Radius_01);text-align:center;">
+                <div class="u-fs-xs u-muted">${s.label}</div>
+                <div class="u-fs-sm u-bold" style="color:${s.color};">+${fmt(s.val)}</div>
+              </div>`).join("")}
+          </div>
+        </div>`;
+    });
+  }
+
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
+/* ==============================================================
+   NOTIFICATIONS (OPT-IN)
+   ============================================================== */
+function enableNotifications() {
+  if (!("Notification" in window)) {
+    alert("Your browser does not support notifications.");
+    return;
+  }
+
+  Notification.requestPermission().then(perm => {
+    if (perm === "granted") {
+      state.notificationsEnabled = true;
+      saveState();
+      render();
+      alert("Reminders enabled! You'll get notified 3 days before subscriptions are due.");
+    } else {
+      alert("Notification permission denied. You can enable it in your browser settings.");
+    }
+  });
+}
+
+function checkNotifications() {
+  if (!state.notificationsEnabled) return;
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+
+  const lastCheck = localStorage.getItem("bh-notif-check");
+  const todayStr = dayKey(new Date());
+  if (lastCheck === todayStr) return;
+  localStorage.setItem("bh-notif-check", todayStr);
+
+  const today = new Date();
+  state.subs.filter(s => s.active).forEach(s => {
+    const bd = new Date(today.getFullYear(), today.getMonth(), s.billingDay);
+    if (bd < today) bd.setMonth(bd.getMonth() + 1);
+    if (Math.ceil((bd - today) / 86400000) === 3) {
+      new Notification("BudgetHub", {
+        body: `${s.name} (${fmt(s.cost)}) due in 3 days`,
+      });
+    }
+  });
+}
+
+/* ==============================================================
+   EXPORT
+   ============================================================== */
+function exportAll() {
+  const config = state.fixedConfig;
+  let csv = "=== BUDGETHUB EXPORT ===\n\n";
+
+  // Fixed expenses
+  csv += "--- FIXED EXPENSES ---\nMonth,Item,Default,Actual,Status\n";
+  Object.keys(state.fixed).sort().forEach(mk => {
+    config.forEach(f => {
+      const d = getFixedData(mk, f.id);
+      if (f.type === "tracked") {
+        const total = (d.entries || []).reduce((s, e) => s + e.amt, 0);
+        csv += `${mk},"${f.name}",${f.amount.toFixed(2)},${total.toFixed(2)},Tracked\n`;
+        (d.entries || []).forEach(e => {
+          csv += `${mk},"  ${e.note || 'Entry'}",0,${e.amt.toFixed(2)},${e.date || ''}\n`;
+        });
+      } else {
+        const act = d.actual !== null ? d.actual : f.amount;
+        csv += `${mk},"${f.name}",${f.amount.toFixed(2)},${act.toFixed(2)},${d.paid ? 'Paid' : 'Unpaid'}\n`;
+      }
+    });
+  });
+
+  // Subscriptions
+  csv += "\n--- SUBSCRIPTIONS ---\nName,Cost,Billing Day,Cycle,Status,Notes\n";
+  state.subs.forEach(s => {
+    csv += `"${s.name}",${s.cost.toFixed(2)},${s.billingDay},${s.cycle},${s.active ? 'Active' : 'Cancelled'},"${s.notes || ''}"\n`;
+  });
+
+  // Health & Outing
+  csv += "\n--- HEALTH & OUTING ---\nMonth,Type,Amount,Note,Date\n";
+  Object.keys(state.health || {}).sort().forEach(mk => {
+    (state.health[mk]?.entries || []).forEach(e => {
+      csv += `${mk},Health,${e.amt.toFixed(2)},"${e.note || ''}",${e.date || ''}\n`;
+    });
+  });
+  Object.keys(state.outing || {}).sort().forEach(mk => {
+    (state.outing[mk]?.entries || []).forEach(e => {
+      csv += `${mk},Outing,${e.amt.toFixed(2)},"${e.note || ''}",${e.date || ''}\n`;
+    });
+  });
+
+  // Savings summary
+  csv += "\n--- SAVINGS ---\nMonth,Fixed,Vehicle,Subs,Health,Outing,Total\n";
+  const allKeys = new Set([
+    ...Object.keys(state.fixed || {}),
+    ...Object.keys(state.health || {}),
+    ...Object.keys(state.outing || {}),
+  ]);
+  [...allKeys].sort().forEach(mk => {
+    const s = calcSavings(mk);
+    csv += `${mk},${s.fixed.toFixed(2)},${s.tracked.toFixed(2)},${s.subs.toFixed(2)},${s.health.toFixed(2)},${s.outing.toFixed(2)},${s.total.toFixed(2)}\n`;
+  });
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `BudgetHub_${dayKey(new Date())}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ==============================================================
+   INIT
+   ============================================================== */
+loadState();
+render();
+</script>
+</body>
+</html>
